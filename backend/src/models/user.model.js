@@ -2,26 +2,43 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
     {
-        email: {
+        clerkUserId: {
             type: String,
             required: true,
             unique: true,
+            index: true,
         },
-        fullName: {
+
+        name: {
             type: String,
             required: true,
         },
-        password: {
+
+        email: {
             type: String,
             required: true,
-            minLength: 6,
         },
-        profilePic: {
+
+        avatarUrl: {
             type: String,
-            default: "",
+        },
+
+        status: {
+            type: String,
+            enum: ["online", "offline", "away"],
+            default: "offline",
+        },
+
+        isBanned: {
+            type: Boolean,
+            default: false,
+        },
+
+        lastSeenAt: {
+            type: Date,
         },
     },
-    { timestamps: true }
+    { timestamps: true },
 );
 
 const User = mongoose.model("User", userSchema);
