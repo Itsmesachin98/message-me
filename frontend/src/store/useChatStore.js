@@ -13,6 +13,7 @@ export const useChatStore = create((set, get) => ({
     selectedUser: null,
     isUsersLoading: false,
 
+    // GET /api/users
     getUsers: async () => {
         set({ isUsersLoading: true, users: [] });
 
@@ -27,6 +28,7 @@ export const useChatStore = create((set, get) => ({
         }
     },
 
+    // GET /api/messages/:otherUserId
     getMessages: async (otherUserId) => {
         set({ isMessagesLoading: true, messages: [], conversationId: null });
 
