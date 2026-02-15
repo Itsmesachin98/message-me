@@ -6,30 +6,40 @@ import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
     messages: [],
+    conversationId: null,
+    isMessagesLoading: false,
+
     users: [],
     selectedUser: null,
     isUsersLoading: false,
-    isMessagesLoading: false,
 
     getUsers: async () => {
-        set({ isUsersLoading: true });
+        set({ isUsersLoading: true, users: [] });
+
         try {
-            const res = await axiosInstance.get("/messages/users");
-            set({ users: res.data });
+            const res = await axiosInstance.get("/users");
+            set({ users: res.data.users });
         } catch (err) {
-            toast.error(err.response.data.message);
+            toast.error(err?.response?.data?.message || "Failed to load users");
+            set({ users: [] });
         } finally {
             set({ isUsersLoading: false });
         }
     },
 
-    getMessages: async (userId) => {
-        set({ isMessagesLoading: true });
+    getMessages: async (otherUserId) => {
+        set({ isMessagesLoading: true, messages: [], conversationId: null });
+
         try {
-            const res = await axiosInstance.get(`/messages/${userId}`);
-            set({ messages: res.data });
+            const res = await axiosInstance.get(`/messages/${otherUserId}`);
+            set({
+                messages: res.data.messages,
+                conversationId: res.data.conversationId,
+            });
         } catch (err) {
-            toast.error(err.response.data.message);
+            toast.error(
+                err?.response?.data?.message || "Failed to load messages",
+            );
         } finally {
             set({ isMessagesLoading: false });
         }
@@ -40,7 +50,7 @@ export const useChatStore = create((set, get) => ({
         try {
             const res = await axiosInstance.post(
                 `/messages/send/${selectedUser._id}`,
-                messageData
+                messageData,
             );
             set({ messages: [...messages, res.data] });
         } catch (err) {

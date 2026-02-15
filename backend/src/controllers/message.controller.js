@@ -1,7 +1,9 @@
-import User from "../models/user.model.js";
-import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+
+import User from "../models/user.model.js";
+import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -19,20 +21,49 @@ export const getUsersForSidebar = async (req, res) => {
 
 export const getMessages = async (req, res) => {
     try {
-        const { id: userToChatId } = req.params;
-        const myId = req.user._id;
+        const { id: otherUserId } = req.params;
+        const currentUserId = req.auth().userId;
 
-        const messages = await Message.find({
-            $or: [
-                { senderId: myId, receiverId: userToChatId },
-                { senderId: userToChatId, receiverId: myId },
-            ],
+        // Authorization check
+        if (!currentUserId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        // Prevent chatting with yourself
+        if (currentUserId === otherUserId) {
+            return res
+                .status(400)
+                .json({ message: "Cannot chat with yourself" });
+        }
+
+        // Find conversation between two users
+        const conversation = await Conversation.findOne({
+            participants: { $all: [currentUserId, otherUserId] },
         });
 
-        res.status(200).json(messages);
+        // If no conversation exists → return empty chat
+        if (!conversation) {
+            return res.status(200).json({
+                conversationId: null,
+                messages: [],
+            });
+        }
+
+        // Fetch messages (fast, indexed)
+        const messages = await Message.find({
+            conversationId: conversation._id,
+        })
+            .sort({ createdAt: 1 })
+            .select("senderId content messageType mediaUrl createdAt isEdited");
+
+        // Respond
+        return res.status(200).json({
+            conversationId: conversation._id,
+            messages,
+        });
     } catch (error) {
-        console.log("Error in getMessages controller: ", error.message);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Error in getMessages controller:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 

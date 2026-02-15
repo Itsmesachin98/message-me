@@ -11,7 +11,7 @@ const getClerkUsers = async (req, res) => {
             image: user.imageUrl,
         }));
 
-        res.status(200).json({ success: true, data: formattedUsers });
+        res.status(200).json({ success: true, users: formattedUsers });
     } catch (error) {
         console.error("Clerk fetch error:", error);
 
