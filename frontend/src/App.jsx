@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useAuth } from "@clerk/clerk-react";
 
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -8,8 +9,13 @@ import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import { useThemeStore } from "./store/useThemeStore";
 import ProtectedRoute from "./wrapper/ProtectedRoute";
+import useSocket from "./hooks/useSocket";
 
 const App = () => {
+    const user = useAuth();
+
+    useSocket(user?.userId);
+
     const { theme } = useThemeStore();
 
     return (
