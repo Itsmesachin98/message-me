@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "@clerk/clerk-react";
+import { useEffect } from "react";
 
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
@@ -9,12 +10,29 @@ import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import { useThemeStore } from "./store/useThemeStore";
 import ProtectedRoute from "./wrapper/ProtectedRoute";
-import useSocket from "./hooks/useSocket";
+import { connectSocket } from "./sockets/socket";
 
 const App = () => {
-    const user = useAuth();
+    // const user = useAuth();
+    // useSocket(user?.userId);
 
-    useSocket(user?.userId);
+    const { isSignedIn, getToken } = useAuth();
+
+    console.log("This is isSignedIn", isSignedIn);
+
+    useEffect(() => {
+        if (!isSignedIn) return;
+
+        const initSocket = async () => {
+            const token = await getToken();
+
+            console.log("This is token", token);
+
+            connectSocket(token);
+        };
+
+        initSocket();
+    }, [isSignedIn, getToken]);
 
     const { theme } = useThemeStore();
 

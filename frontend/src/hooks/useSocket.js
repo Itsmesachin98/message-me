@@ -2,16 +2,16 @@ import { useEffect } from "react";
 
 import { connectSocket, disconnectSocket } from "../sockets/socket";
 
-const useSocket = (userId) => {
+const useSocket = (token) => {
     useEffect(() => {
-        if (!userId) return;
+        if (!token) return;
 
-        connectSocket(userId);
+        connectSocket(token);
 
         return () => {
             disconnectSocket();
         };
-    }, [userId]);
+    }, [token]);
 };
 
 export default useSocket;

@@ -2,9 +2,10 @@ import { io } from "socket.io-client";
 
 let socket;
 
-const connectSocket = (userId) => {
+const connectSocket = (token) => {
     socket = io(import.meta.env.VITE_API_BASE_URL, {
-        auth: { userId },
+        auth: { token },
+        transports: ["websocket"],
         autoConnect: true,
     });
 
