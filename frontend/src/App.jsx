@@ -13,21 +13,13 @@ import ProtectedRoute from "./wrapper/ProtectedRoute";
 import { connectSocket } from "./sockets/socket";
 
 const App = () => {
-    // const user = useAuth();
-    // useSocket(user?.userId);
-
     const { isSignedIn, getToken } = useAuth();
-
-    console.log("This is isSignedIn", isSignedIn);
 
     useEffect(() => {
         if (!isSignedIn) return;
 
         const initSocket = async () => {
             const token = await getToken();
-
-            console.log("This is token", token);
-
             connectSocket(token);
         };
 

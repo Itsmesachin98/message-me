@@ -9,10 +9,6 @@ const connectSocket = (token) => {
         autoConnect: true,
     });
 
-    socket.on("connect", () => {
-        console.log(socket.id);
-    });
-
     return socket;
 };
 

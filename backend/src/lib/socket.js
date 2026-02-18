@@ -1,4 +1,3 @@
-import { clerkClient } from "@clerk/express";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import { verifyToken } from "@clerk/express";
@@ -15,11 +14,8 @@ const io = new Server(server, {
 });
 
 io.use(async (socket, next) => {
-    console.log("Test 1");
     try {
         const { token } = socket.handshake.auth;
-
-        console.log("Test 2");
 
         if (!token) {
             return next(new Error("Unauthorized"));
@@ -29,23 +25,18 @@ io.use(async (socket, next) => {
             secretKey: process.env.CLERK_SECRET_KEY,
         });
 
-        console.log("Test 3");
-
         socket.data.userId = payload.sub; // userId
-
-        console.log("Test 4");
         next();
     } catch (err) {
-        console.log("This is the actual error: ", err);
-        console.error("Socket auth failed:", err.message);
+        console.log("Socket auth failed: ", err);
         next(new Error("Unauthorized"));
     }
 });
 
 io.on("connection", (socket) => {
-    console.log("User connected");
-    console.log(`This is user id: ${socket.data.userId}`);
-    console.log(`This is socket id: ${socket.id}`);
+    console.log(
+        `User connected. User id - ${socket.data.userId}, Socket id - ${socket.id}`,
+    );
 
     // addUser(socket.userId, socket.id);
 
