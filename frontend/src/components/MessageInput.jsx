@@ -2,13 +2,14 @@ import { useRef, useState } from "react";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 
+import { getSocket } from "../sockets/socket";
 import { useChatStore } from "../store/useChatStore";
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-    const { sendMessage } = useChatStore();
+    const { conversationId } = useChatStore();
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -32,22 +33,35 @@ const MessageInput = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
 
-        if (!text.trim() && !imagePreview) return;
+        const socket = getSocket();
 
-        try {
-            await sendMessage({
-                text: text.trim(),
-                image: imagePreview,
-            });
+        socket.emit("sendMessage", {
+            text: text.trim(),
+            conversationId,
+        });
 
-            // Clear form
-            setText("");
-            setImagePreview(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-        } catch (error) {
-            console.error("Failed to send message:", error);
-        }
+        setText("");
     };
+
+    // const handleSendMessage = async (e) => {
+    //     e.preventDefault();
+
+    //     if (!text.trim() && !imagePreview) return;
+
+    //     try {
+    //         await sendMessage({
+    //             text: text.trim(),
+    //             image: imagePreview,
+    //         });
+
+    //         // Clear form
+    //         setText("");
+    //         setImagePreview(null);
+    //         if (fileInputRef.current) fileInputRef.current.value = "";
+    //     } catch (error) {
+    //         console.error("Failed to send message:", error);
+    //     }
+    // };
 
     return (
         <div className="p-4 w-full">

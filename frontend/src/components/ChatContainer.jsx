@@ -1,40 +1,46 @@
 import { useEffect, useRef } from "react";
+import { useUser } from "@clerk/clerk-react";
 
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
-import { useAuthStore } from "../store/useAuthStore";
 import { formatMessageTime } from "../lib/utils";
+import { getSocket } from "../sockets/socket";
 
 const ChatContainer = () => {
+    const { user } = useUser();
+
     const {
         messages,
         getMessages,
         isMessagesLoading,
+        conversationId,
         selectedUser,
-        // subscribeToMessages,
-        // unsubscribeFromMessages,
+        subscribeToMessages,
     } = useChatStore();
 
-    const { authUser } = useAuthStore();
     const messageEndRef = useRef(null);
 
     useEffect(() => {
+        if (!selectedUser) return;
+
         getMessages(selectedUser.clerkId);
-    }, []);
+    }, [selectedUser]);
 
-    // useEffect(() => {
-    //     getMessages(selectedUser.clerkId);
-    //     subscribeToMessages();
+    useEffect(() => {
+        if (!conversationId) return;
 
-    //     return () => unsubscribeFromMessages();
-    // }, [
-    //     selectedUser.clerkId,
-    //     getMessages,
-    //     subscribeToMessages,
-    //     unsubscribeFromMessages,
-    // ]);
+        const socket = getSocket();
+        socket.emit("joinConversation", conversationId);
+
+        subscribeToMessages();
+
+        return () => {
+            socket.emit("leaveConversation", conversationId);
+            socket.off("newMessage");
+        };
+    }, [conversationId]);
 
     // useEffect(() => {
     //     if (messageEndRef.current && messages) {
@@ -60,9 +66,9 @@ const ChatContainer = () => {
                     <div
                         key={message._id}
                         className={`chat ${
-                            message.senderId === authUser._id
-                                ? "chat-end"
-                                : "chat-start"
+                            message.senderId === selectedUser.clerkId
+                                ? "chat-start"
+                                : "chat-end"
                         }`}
                         ref={messageEndRef}
                     >
@@ -70,10 +76,10 @@ const ChatContainer = () => {
                             <div className="size-10 rounded-full border">
                                 <img
                                     src={
-                                        message.senderId === authUser._id
-                                            ? authUser.profilePic ||
-                                              "/avatar.png"
-                                            : selectedUser.profilePic ||
+                                        message.senderId ===
+                                        selectedUser.clerkId
+                                            ? user?.imageUrl || "/avatar.png"
+                                            : selectedUser.image ||
                                               "/avatar.png"
                                     }
                                     alt="profile pic"
@@ -93,7 +99,7 @@ const ChatContainer = () => {
                                     className="sm:max-w-[200px] rounded-md mb-2"
                                 />
                             )}
-                            {message.text && <p>{message.text}</p>}
+                            {message.content && <p>{message.content}</p>}
                         </div>
                     </div>
                 ))}

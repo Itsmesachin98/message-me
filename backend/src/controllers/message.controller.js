@@ -67,6 +67,8 @@ const getMessages = async (req, res) => {
     }
 };
 
+// socket.on("sendMessage", async () => {});
+
 // const sendMessage = async (req, res) => {
 //     try {
 //         const { text, image } = req.body;
