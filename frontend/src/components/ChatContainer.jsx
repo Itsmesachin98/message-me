@@ -42,11 +42,11 @@ const ChatContainer = () => {
         };
     }, [conversationId]);
 
-    // useEffect(() => {
-    //     if (messageEndRef.current && messages) {
-    //         messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-    //     }
-    // }, [messages]);
+    useEffect(() => {
+        if (messageEndRef.current && messages) {
+            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [messages]);
 
     if (isMessagesLoading)
         return (
