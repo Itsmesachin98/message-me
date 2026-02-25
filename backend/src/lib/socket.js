@@ -16,6 +16,8 @@ const io = new Server(server, {
     },
 });
 
+const onlineUsers = new Map();
+
 io.use(async (socket, next) => {
     try {
         const { token } = socket.handshake.auth;
@@ -37,9 +39,23 @@ io.use(async (socket, next) => {
 });
 
 io.on("connection", (socket) => {
+    const userId = socket.data.userId;
+
     console.log(
-        `User connected. User id - ${socket.data.userId}, Socket id - ${socket.id}`,
+        `User connected. User id - ${userId}, Socket id - ${socket.id}`,
     );
+
+    // Add user to online map
+    if (!onlineUsers.has(userId)) {
+        onlineUsers.set(userId, new Set());
+    }
+
+    onlineUsers.get(userId).add(socket.id);
+
+    console.log(onlineUsers.keys());
+
+    // Broadcast online users
+    io.emit("onlineUsers", [...onlineUsers.keys()]);
 
     // Join Conversation
     socket.on("joinConversation", async (conversationId) => {
@@ -58,6 +74,7 @@ io.on("connection", (socket) => {
         socket.leave(conversationId);
     });
 
+    // Send Message
     socket.on("sendMessage", async ({ conversationId, text }) => {
         const senderId = socket.data.userId;
 
@@ -70,8 +87,19 @@ io.on("connection", (socket) => {
         io.to(conversationId).emit("newMessage", message);
     });
 
+    // Handle Disconnection
     socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.data.userId);
+        if (!onlineUsers.has(userId)) return;
+
+        onlineUsers.get(userId).delete(socket.id);
+
+        if (onlineUsers.get(userId).size === 0) {
+            onlineUsers.delete(userId);
+        }
+
+        io.emit("onlineUsers", [...onlineUsers.keys()]);
+
+        console.log("User disconnected:", userId);
     });
 });
 

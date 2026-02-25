@@ -14,6 +14,8 @@ export const useChatStore = create((set, get) => ({
     selectedUser: null,
     isUsersLoading: false,
 
+    onlineUsers: [],
+
     // GET /api/users
     getUsers: async () => {
         set({ isUsersLoading: true, users: [] });
@@ -64,10 +66,24 @@ export const useChatStore = create((set, get) => ({
     subscribeToMessages: () => {
         const socket = getSocket();
 
+        if (!socket) return;
+
         socket.off("newMessage");
 
         socket.on("newMessage", (newMessage) => {
             set((state) => ({ messages: [...state.messages, newMessage] }));
+        });
+    },
+
+    subscribeToOnlineUsers: () => {
+        const socket = getSocket();
+
+        if (!socket) return;
+
+        socket.off("onlineUsers");
+
+        socket.on("onlineUsers", (users) => {
+            set({ onlineUsers: users });
         });
     },
 
