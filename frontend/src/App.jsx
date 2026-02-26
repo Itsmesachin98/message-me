@@ -25,7 +25,7 @@ const App = () => {
             const socket = connectSocket(token);
 
             socket.on("connect", () => {
-                subscribeToOnlineUsers(); // 🔥 subscribe AFTER connect
+                subscribeToOnlineUsers();
             });
         };
 

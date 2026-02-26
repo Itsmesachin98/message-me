@@ -52,8 +52,6 @@ io.on("connection", (socket) => {
 
     onlineUsers.get(userId).add(socket.id);
 
-    console.log(onlineUsers.keys());
-
     // Broadcast online users
     io.emit("onlineUsers", [...onlineUsers.keys()]);
 
