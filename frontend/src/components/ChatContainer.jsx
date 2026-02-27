@@ -17,7 +17,6 @@ const ChatContainer = () => {
         isMessagesLoading,
         conversationId,
         selectedUser,
-        subscribeToMessages,
     } = useChatStore();
 
     const messageEndRef = useRef(null);
@@ -26,19 +25,18 @@ const ChatContainer = () => {
         if (!selectedUser) return;
 
         getMessages(selectedUser.clerkId);
-    }, [selectedUser]);
+    }, [selectedUser, getMessages]);
 
     useEffect(() => {
         if (!conversationId) return;
 
         const socket = getSocket();
-        socket.emit("joinConversation", conversationId);
+        if (!socket) return;
 
-        subscribeToMessages();
+        socket.emit("joinConversation", conversationId);
 
         return () => {
             socket.emit("leaveConversation", conversationId);
-            socket.off("newMessage");
         };
     }, [conversationId]);
 

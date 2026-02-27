@@ -11,22 +11,16 @@ import SettingsPage from "./pages/SettingsPage";
 import { useThemeStore } from "./store/useThemeStore";
 import ProtectedRoute from "./wrapper/ProtectedRoute";
 import { connectSocket } from "./sockets/socket";
-import { useChatStore } from "./store/useChatStore";
 
 const App = () => {
     const { isSignedIn, getToken } = useAuth();
-    const { subscribeToOnlineUsers } = useChatStore();
 
     useEffect(() => {
         if (!isSignedIn) return;
 
         const initSocket = async () => {
             const token = await getToken();
-            const socket = connectSocket(token);
-
-            socket.on("connect", () => {
-                subscribeToOnlineUsers();
-            });
+            connectSocket(token);
         };
 
         initSocket();

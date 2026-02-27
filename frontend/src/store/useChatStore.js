@@ -2,7 +2,7 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 
 import { axiosInstance } from "../lib/axios";
-import { getSocket } from "../sockets/socket";
+// import { getSocket } from "../sockets/socket";
 
 export const useChatStore = create((set) => ({
     messages: [],
@@ -49,29 +49,10 @@ export const useChatStore = create((set) => ({
         }
     },
 
-    subscribeToMessages: () => {
-        const socket = getSocket();
+    setOnlineUsers: (users) => set({ onlineUsers: users }),
 
-        if (!socket) return;
-
-        socket.off("newMessage");
-
-        socket.on("newMessage", (newMessage) => {
-            set((state) => ({ messages: [...state.messages, newMessage] }));
-        });
-    },
-
-    subscribeToOnlineUsers: () => {
-        const socket = getSocket();
-
-        if (!socket) return;
-
-        socket.off("onlineUsers");
-
-        socket.on("onlineUsers", (users) => {
-            set({ onlineUsers: users });
-        });
-    },
+    addMessage: (message) =>
+        set((state) => ({ messages: [...state.messages, message] })),
 
     setSelectedUser: (selectedUser) => set({ selectedUser }),
 }));
