@@ -19,7 +19,7 @@ export const useChatStore = create((set) => ({
         set({ isUsersLoading: true, users: [] });
 
         try {
-            const res = await axiosInstance.get("/users");
+            const res = await axiosInstance.get("/api/users");
             set({ users: res.data.users });
         } catch (err) {
             toast.error(err?.response?.data?.message || "Failed to load users");
@@ -34,7 +34,7 @@ export const useChatStore = create((set) => ({
         set({ isMessagesLoading: true, messages: [], conversationId: null });
 
         try {
-            const res = await axiosInstance.get(`/messages/${otherUserId}`);
+            const res = await axiosInstance.get(`/api/messages/${otherUserId}`);
             set({
                 messages: res.data.messages,
                 conversationId: res.data.conversationId,
