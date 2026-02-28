@@ -1,10 +1,12 @@
+import { getAuth } from "@clerk/express";
+
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 
 const getMessages = async (req, res) => {
     try {
         const { id: otherUserId } = req.params;
-        const currentUserId = req.auth().userId;
+        const { userId: currentUserId } = getAuth(req);
 
         // Authorization check
         if (!currentUserId) {

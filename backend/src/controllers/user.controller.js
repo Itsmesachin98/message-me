@@ -1,10 +1,31 @@
-import { clerkClient } from "@clerk/express";
+import { clerkClient, getAuth } from "@clerk/express";
+
+import User from "../models/user.model.js";
 
 const getClerkUsers = async (req, res) => {
     try {
-        const users = await clerkClient.users.getUserList({ limit: 100 });
+        const { userId } = getAuth(req);
 
-        const formattedUsers = users.data.map((user) => ({
+        // STEP 1 — Ensure logged-in user exists in DB
+        let existingUser = await User.findOne({ clerkUserId: userId });
+
+        if (!existingUser) {
+            const clerkUser = await clerkClient.users.getUser(userId);
+
+            existingUser = await User.create({
+                clerkUserId: clerkUser.id,
+                name: `${clerkUser.firstName ?? ""} ${clerkUser.lastName ?? ""}`.trim(),
+                email: clerkUser.emailAddresses?.[0]?.emailAddress ?? null,
+                image: clerkUser.imageUrl ?? null,
+            });
+        }
+
+        // STEP 2 — Fetch other users (from Clerk OR better from DB)
+        const allClerkUsers = await clerkClient.users.getUserList({
+            limit: 50,
+        });
+
+        const formattedUsers = allClerkUsers.data.map((user) => ({
             clerkId: user.id,
             name: `${user.firstName ?? ""} ${user.lastName ?? ""}`,
             email: user.emailAddresses[0]?.emailAddress,

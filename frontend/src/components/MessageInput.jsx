@@ -9,7 +9,7 @@ const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-    const { conversationId } = useChatStore();
+    const { selectedUser, conversationId } = useChatStore();
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -38,6 +38,7 @@ const MessageInput = () => {
         socket.emit("sendMessage", {
             text: text.trim(),
             conversationId,
+            receiverId: selectedUser.clerkId,
         });
 
         setText("");

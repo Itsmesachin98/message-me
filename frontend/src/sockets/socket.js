@@ -22,7 +22,9 @@ const connectSocket = (token) => {
     socket.on("newMessage", (message) => {
         const { conversationId } = useChatStore.getState();
 
-        if (message.conversationId !== conversationId) return;
+        if (!conversationId) {
+            useChatStore.getState().setConversationId(message.conversationId);
+        }
 
         useChatStore.getState().addMessage(message);
     });
