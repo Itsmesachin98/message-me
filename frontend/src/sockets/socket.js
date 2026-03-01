@@ -11,7 +11,9 @@ const connectSocket = (token) => {
     });
 
     socket.on("connect", () => {
-        console.log("Connected:", socket.id);
+        if (import.meta.env.MODE === "development") {
+            console.log("Connected:", socket.id);
+        }
     });
 
     // Attach listeners here
