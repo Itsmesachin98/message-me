@@ -1,6 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { useAuth } from "@clerk/clerk-react";
+import { Loader } from "lucide-react";
 import { useEffect } from "react";
 
 import Navbar from "./components/Navbar";
@@ -8,49 +8,64 @@ import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
+import ProfilePage from "./pages/ProfilePage";
 import { useThemeStore } from "./store/useThemeStore";
-import ProtectedRoute from "./wrapper/ProtectedRoute";
-import { connectSocket } from "./sockets/socket";
+import { useAuthStore } from "./store/useAuthStore";
+// import { connectSocket } from "./sockets/socket";
 
 const App = () => {
-    const { isSignedIn, getToken } = useAuth();
+    const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
+    const { theme } = useThemeStore();
 
     useEffect(() => {
-        if (!isSignedIn) return;
+        checkAuth();
+    }, [checkAuth]);
 
-        const initSocket = async () => {
-            const token = await getToken();
-            connectSocket(token);
-        };
+    if (isCheckingAuth && !authUser) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <Loader className="size-10 animate-spin" />
+            </div>
+        );
+    }
 
-        initSocket();
-    }, [isSignedIn, getToken]);
+    // const { isSignedIn, getToken } = useAuth();
 
-    const { theme } = useThemeStore();
+    // useEffect(() => {
+    //     if (!isSignedIn) return;
+
+    //     const initSocket = async () => {
+    //         const token = await getToken();
+    //         connectSocket(token);
+    //     };
+
+    //     initSocket();
+    // }, [isSignedIn, getToken]);
 
     return (
         <div data-theme={theme}>
             <Navbar />
 
             <Routes>
-                {/* LOGIN ROUTE */}
-                <Route path="/login" element={<LoginPage />} />
-
-                {/* SIGNUP */}
-                <Route path="/signup" element={<SignUpPage />} />
-
-                {/* HOME (protected) */}
                 <Route
                     path="/"
+                    element={authUser ? <HomePage /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/signup"
+                    element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+                />
+                <Route
+                    path="/login"
+                    element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+                />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route
+                    path="/profile"
                     element={
-                        <ProtectedRoute>
-                            <HomePage />
-                        </ProtectedRoute>
+                        authUser ? <ProfilePage /> : <Navigate to="/login" />
                     }
                 />
-
-                {/* SETTINGS */}
-                <Route path="/settings" element={<SettingsPage />} />
             </Routes>
 
             <Toaster />

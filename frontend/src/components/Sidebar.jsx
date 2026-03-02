@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Users } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
 
 import { useChatStore } from "../store/useChatStore";
+// import { useAuthStore } from "../store/useAuthStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 
 const Sidebar = () => {
-    const { user: loggedInUser } = useUser();
+    // const { authUser } = useAuthStore();
 
     const {
         getUsers,
@@ -23,11 +23,11 @@ const Sidebar = () => {
         getUsers();
     }, [getUsers]);
 
-    const filteredUsers = users
-        .filter((user) => user.clerkId !== loggedInUser?.id)
-        .filter((user) =>
-            showOnlineOnly ? onlineUsers.includes(user.clerkId) : true,
-        );
+    // const filteredUsers = users
+    //     .filter((user) => user.clerkId !== loggedInUser?.id)
+    //     .filter((user) =>
+    //         showOnlineOnly ? onlineUsers.includes(user.clerkId) : true,
+    //     );
 
     if (isUsersLoading) return <SidebarSkeleton />;
 
@@ -61,23 +61,23 @@ const Sidebar = () => {
             </div>
 
             <div className="overflow-y-auto w-full py-3">
-                {filteredUsers.map((user) => (
+                {users.map((user) => (
                     <button
-                        key={user.clerkId}
+                        key={user._id}
                         onClick={() => setSelectedUser(user)}
                         className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors ${
-                            selectedUser?.clerkId === user.clerkId
+                            selectedUser?._id === user._id
                                 ? "bg-base-300 ring-1 ring-base-300"
                                 : ""
                         }`}
                     >
                         <div className="relative mx-auto lg:mx-0">
                             <img
-                                src={user.image || "/avatar.png"}
-                                alt={user.name}
+                                src={user.profilePic || "/avatar.png"}
+                                alt={user.fullName}
                                 className="size-12 object-cover rounded-full"
                             />
-                            {onlineUsers.includes(user.clerkId) && (
+                            {onlineUsers.includes(user._id) && (
                                 <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
                             )}
                         </div>
@@ -85,10 +85,10 @@ const Sidebar = () => {
                         {/* User info - only visible on larger screens */}
                         <div className="hidden lg:block text-left min-w-0">
                             <div className="font-medium truncate">
-                                {user.name}
+                                {user.fullName}
                             </div>
                             <div className="text-sm text-zinc-400">
-                                {onlineUsers.includes(user.clerkId)
+                                {onlineUsers.includes(user._id)
                                     ? "Online"
                                     : "Offline"}
                             </div>
@@ -96,7 +96,7 @@ const Sidebar = () => {
                     </button>
                 ))}
 
-                {filteredUsers.length === 0 && (
+                {users.length === 0 && (
                     <div className="text-center text-zinc-500 py-4">
                         No online users
                     </div>

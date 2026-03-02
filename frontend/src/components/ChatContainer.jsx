@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useUser } from "@clerk/clerk-react";
 
 import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
@@ -7,9 +6,10 @@ import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { formatMessageTime } from "../lib/utils";
 import { getSocket } from "../sockets/socket";
+import { useAuthStore } from "../store/useAuthStore";
 
 const ChatContainer = () => {
-    const { user } = useUser();
+    const { authUser } = useAuthStore();
 
     const {
         messages,
@@ -24,7 +24,7 @@ const ChatContainer = () => {
     useEffect(() => {
         if (!selectedUser) return;
 
-        getMessages(selectedUser.clerkId);
+        getMessages(selectedUser._id);
     }, [selectedUser, getMessages]);
 
     useEffect(() => {
@@ -64,7 +64,7 @@ const ChatContainer = () => {
                     <div
                         key={message._id}
                         className={`chat ${
-                            message.senderId === user.id
+                            message.senderId === authUser._id
                                 ? "chat-end"
                                 : "chat-start"
                         }`}
@@ -74,9 +74,10 @@ const ChatContainer = () => {
                             <div className="size-10 rounded-full border">
                                 <img
                                     src={
-                                        message.senderId === user.id
-                                            ? user?.imageUrl || "/avatar.png"
-                                            : selectedUser.image ||
+                                        message.senderId === authUser._id
+                                            ? authUser?.profilePic ||
+                                              "/avatar.png"
+                                            : selectedUser.profilePic ||
                                               "/avatar.png"
                                     }
                                     alt="profile pic"

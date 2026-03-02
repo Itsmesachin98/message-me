@@ -6,7 +6,7 @@ import Message from "../models/message.model.js";
 const getMessages = async (req, res) => {
     try {
         const { id: otherUserId } = req.params;
-        const { userId: currentUserId } = getAuth(req);
+        const currentUserId = req.user._id;
 
         // Authorization check
         if (!currentUserId) {

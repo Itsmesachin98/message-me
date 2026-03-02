@@ -1,5 +1,3 @@
-import { useUser } from "@clerk/clerk-react";
-
 import { useChatStore } from "../store/useChatStore";
 import Sidebar from "../components/Sidebar";
 import NoChatSelected from "../components/NoChatSelected";
@@ -7,9 +5,6 @@ import ChatContainer from "../components/ChatContainer";
 
 const HomePage = () => {
     const { selectedUser } = useChatStore();
-    const { isLoaded } = useUser();
-
-    if (!isLoaded) return null;
 
     return (
         <div className="h-screen bg-base-200">
