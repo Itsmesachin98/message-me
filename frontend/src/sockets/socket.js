@@ -22,12 +22,6 @@ const connectSocket = (token) => {
     });
 
     socket.on("newMessage", (message) => {
-        const { conversationId } = useChatStore.getState();
-
-        if (!conversationId) {
-            useChatStore.getState().setConversationId(message.conversationId);
-        }
-
         useChatStore.getState().addMessage(message);
     });
 

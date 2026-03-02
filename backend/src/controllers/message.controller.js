@@ -51,4 +51,52 @@ const getMessages = async (req, res) => {
     }
 };
 
-export { getMessages };
+const saveMessages = async (req, res) => {
+    try {
+        const { text, conversationId, receiverId } = req.body;
+        const { userId: senderId } = getAuth(req);
+
+        let conversation;
+
+        // CASE 1: If conversationId exists
+        if (conversationId) {
+            conversation = await Conversation.findById(conversationId);
+        }
+
+        // CASE 2: Find by participants
+        if (!conversation) {
+            const participants = [senderId, receiverId].sort();
+
+            conversation = await Conversation.findOne({ participants });
+        }
+
+        // CASE 3: Create new conversation
+        if (!conversation) {
+            const participants = [senderId, receiverId].sort();
+
+            conversation = await Conversation.create({
+                participants,
+                createdBy: senderId,
+            });
+        }
+
+        // SECURITY CHECK
+        if (!conversation.participants.includes(senderId)) {
+            return;
+        }
+
+        // Save message
+        const message = await Message.create({
+            conversationId: conversation._id,
+            senderId,
+            content: text,
+        });
+
+        res.status(201).json({ success: true, message });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+export { getMessages, saveMessages };

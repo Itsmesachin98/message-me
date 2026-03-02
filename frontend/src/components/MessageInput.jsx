@@ -4,12 +4,13 @@ import toast from "react-hot-toast";
 
 import { getSocket } from "../sockets/socket";
 import { useChatStore } from "../store/useChatStore";
+import { axiosInstance } from "../lib/axios";
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-    const { selectedUser, conversationId } = useChatStore();
+    const { selectedUser, conversationId, setConversationId } = useChatStore();
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -33,36 +34,42 @@ const MessageInput = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
 
-        const socket = getSocket();
+        if (!text.trim()) return;
 
-        socket.emit("sendMessage", {
-            text: text.trim(),
-            conversationId,
-            receiverId: selectedUser.clerkId,
-        });
+        try {
+            const socket = getSocket();
 
-        setText("");
+            const res = await axiosInstance.post("/messages", {
+                text: text.trim(),
+                conversationId,
+                receiverId: selectedUser.clerkId,
+            });
+
+            const { message } = res.data;
+
+            if (!conversationId) {
+                const newConversationId = message.conversationId;
+
+                setConversationId(newConversationId);
+
+                socket.emit(
+                    "joinConversation",
+                    newConversationId,
+                    (response) => {
+                        if (response.success) {
+                            socket.emit("sendMessage", message);
+                        }
+                    },
+                );
+            } else {
+                socket.emit("sendMessage", message);
+            }
+        } catch (error) {
+            console.log("Failed to send message: ", error);
+        }
+
+        setText(""); // Clear input field
     };
-
-    // const handleSendMessage = async (e) => {
-    //     e.preventDefault();
-
-    //     if (!text.trim() && !imagePreview) return;
-
-    //     try {
-    //         await sendMessage({
-    //             text: text.trim(),
-    //             image: imagePreview,
-    //         });
-
-    //         // Clear form
-    //         setText("");
-    //         setImagePreview(null);
-    //         if (fileInputRef.current) fileInputRef.current.value = "";
-    //     } catch (error) {
-    //         console.error("Failed to send message:", error);
-    //     }
-    // };
 
     return (
         <div className="p-4 w-full">

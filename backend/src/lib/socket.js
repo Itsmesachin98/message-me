@@ -7,7 +7,6 @@ import { verifyToken } from "@clerk/express";
 import express from "express";
 
 import Conversation from "../models/conversation.model.js";
-import Message from "../models/message.model.js";
 
 const app = express();
 const server = createServer(app);
@@ -61,13 +60,17 @@ io.on("connection", (socket) => {
     io.emit("onlineUsers", [...onlineUsers.keys()]);
 
     // Join Conversation
-    socket.on("joinConversation", async (conversationId) => {
+    socket.on("joinConversation", async (conversationId, callback) => {
         const conversation = await Conversation.findById(conversationId);
 
         if (!conversation) return;
         if (!conversation.participants.includes(userId)) return;
 
         socket.join(conversationId.toString());
+
+        if (typeof callback === "function") {
+            callback({ success: true });
+        }
     });
 
     // Leave Conversation
@@ -75,55 +78,9 @@ io.on("connection", (socket) => {
         socket.leave(conversationId.toString());
     });
 
-    // Send Message
-    socket.on("sendMessage", async ({ conversationId, text, receiverId }) => {
-        try {
-            const senderId = userId;
-            let conversation;
-
-            // CASE 1: If conversationId exists
-            if (conversationId) {
-                conversation = await Conversation.findById(conversationId);
-            }
-
-            // CASE 2: Find by participants
-            if (!conversation) {
-                const participants = [senderId, receiverId].sort();
-
-                conversation = await Conversation.findOne({ participants });
-            }
-
-            // CASE 3: Create new conversation
-            if (!conversation) {
-                const participants = [senderId, receiverId].sort();
-
-                conversation = await Conversation.create({
-                    participants,
-                    createdBy: senderId,
-                });
-
-                socket.join(conversation._id.toString());
-            }
-
-            // SECURITY CHECK
-            if (!conversation.participants.includes(senderId)) {
-                return;
-            }
-
-            // Save message
-            const message = await Message.create({
-                conversationId: conversation._id,
-                senderId,
-                content: text,
-            });
-
-            io.to(conversation._id.toString()).emit("newMessage", {
-                ...message.toObject(),
-                conversationId: conversation._id,
-            });
-        } catch (err) {
-            console.error("Send message error:", err);
-        }
+    socket.on("sendMessage", (message) => {
+        const { conversationId } = message;
+        io.to(conversationId).emit("newMessage", message);
     });
 
     // Handle Disconnection
