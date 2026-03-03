@@ -3,11 +3,13 @@ import { useChatStore } from "../store/useChatStore";
 
 let socket;
 
-const connectSocket = (token) => {
+const connectSocket = () => {
+    if (socket) return socket; // prevent multiple connections
+
     socket = io(import.meta.env.VITE_API_BASE_URL, {
-        auth: { token },
         transports: ["websocket"],
         autoConnect: true,
+        withCredentials: true,
     });
 
     socket.on("connect", () => {
@@ -34,6 +36,10 @@ const disconnectSocket = () => {
     if (socket) {
         socket.disconnect();
         socket = null;
+
+        if (import.meta.env.MODE === "development") {
+            console.log("Disconnected");
+        }
     }
 };
 

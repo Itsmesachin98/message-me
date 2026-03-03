@@ -3,8 +3,9 @@ dotenv.config();
 
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { verifyToken } from "@clerk/express";
 import express from "express";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
 
 import Conversation from "../models/conversation.model.js";
 
@@ -24,20 +25,20 @@ const onlineUsers = new Map();
 
 io.use(async (socket, next) => {
     try {
-        const { token } = socket.handshake.auth;
+        const cookies = socket.handshake.headers.cookie;
 
-        if (!token) {
-            return next(new Error("Unauthorized"));
-        }
+        if (!cookies) return next(new Error("Unauthorized - No cookies"));
 
-        const payload = await verifyToken(token, {
-            secretKey: process.env.CLERK_SECRET_KEY,
-        });
+        const parsedCookies = cookie.parse(cookies);
+        const token = parsedCookies.accessToken;
 
-        socket.data.userId = payload.sub; // userId
+        if (!token) return next(new Error("Unauthorized - No token"));
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        socket.data.userId = decoded.userId;
         next();
-    } catch (err) {
-        console.log("Socket auth failed: ", err);
+    } catch (error) {
+        console.error("Socket auth failed:", error.message);
         next(new Error("Unauthorized"));
     }
 });

@@ -11,7 +11,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
 import { useThemeStore } from "./store/useThemeStore";
 import { useAuthStore } from "./store/useAuthStore";
-// import { connectSocket } from "./sockets/socket";
+import { connectSocket, disconnectSocket } from "./sockets/socket";
 
 const App = () => {
     const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
@@ -21,6 +21,16 @@ const App = () => {
         checkAuth();
     }, [checkAuth]);
 
+    useEffect(() => {
+        if (!authUser) return;
+
+        connectSocket();
+
+        return () => {
+            disconnectSocket();
+        };
+    }, [authUser]);
+
     if (isCheckingAuth && !authUser) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -28,19 +38,6 @@ const App = () => {
             </div>
         );
     }
-
-    // const { isSignedIn, getToken } = useAuth();
-
-    // useEffect(() => {
-    //     if (!isSignedIn) return;
-
-    //     const initSocket = async () => {
-    //         const token = await getToken();
-    //         connectSocket(token);
-    //     };
-
-    //     initSocket();
-    // }, [isSignedIn, getToken]);
 
     return (
         <div data-theme={theme}>

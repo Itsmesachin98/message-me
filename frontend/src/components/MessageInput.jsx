@@ -42,7 +42,7 @@ const MessageInput = () => {
             const res = await axiosInstance.post("/messages", {
                 text: text.trim(),
                 conversationId,
-                receiverId: selectedUser.clerkId,
+                receiverId: selectedUser._id,
             });
 
             const { message } = res.data;

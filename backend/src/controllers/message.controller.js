@@ -1,8 +1,7 @@
-import { getAuth } from "@clerk/express";
-
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
 
+// GET /api/messages/:otherUserId
 const getMessages = async (req, res) => {
     try {
         const { id: otherUserId } = req.params;
@@ -10,14 +9,16 @@ const getMessages = async (req, res) => {
 
         // Authorization check
         if (!currentUserId) {
-            return res.status(401).json({ message: "Unauthorized" });
+            return res
+                .status(401)
+                .json({ success: false, message: "Unauthorized" });
         }
 
         // Prevent chatting with yourself
         if (currentUserId === otherUserId) {
             return res
                 .status(400)
-                .json({ message: "Cannot chat with yourself" });
+                .json({ success: false, message: "Cannot chat with yourself" });
         }
 
         // Find conversation between two users
@@ -28,6 +29,7 @@ const getMessages = async (req, res) => {
         // If no conversation exists → return empty chat
         if (!conversation) {
             return res.status(200).json({
+                success: true,
                 conversationId: null,
                 messages: [],
             });
@@ -42,19 +44,23 @@ const getMessages = async (req, res) => {
 
         // Respond
         return res.status(200).json({
+            success: true,
             conversationId: conversation._id,
             messages,
         });
     } catch (error) {
         console.error("Error in getMessages controller:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res
+            .status(500)
+            .json({ success: false, message: "Internal server error" });
     }
 };
 
+// POST /api/messages
 const saveMessages = async (req, res) => {
     try {
         const { text, conversationId, receiverId } = req.body;
-        const { userId: senderId } = getAuth(req);
+        const senderId = req.user._id;
 
         let conversation;
 
@@ -95,7 +101,7 @@ const saveMessages = async (req, res) => {
         res.status(201).json({ success: true, message });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ success: false, error: "Server error" });
     }
 };
 

@@ -46,7 +46,7 @@ const ChatContainer = () => {
         }
     }, [messages]);
 
-    if (isMessagesLoading)
+    if (isMessagesLoading) {
         return (
             <div className="flex-1 flex flex-col overflow-auto">
                 <ChatHeader />
@@ -54,6 +54,7 @@ const ChatContainer = () => {
                 <MessageInput />
             </div>
         );
+    }
 
     return (
         <div className="flex-1 flex flex-col overflow-auto">
@@ -64,7 +65,7 @@ const ChatContainer = () => {
                     <div
                         key={message._id}
                         className={`chat ${
-                            message.senderId === authUser._id
+                            message.senderId === authUser.user._id
                                 ? "chat-end"
                                 : "chat-start"
                         }`}
@@ -74,8 +75,8 @@ const ChatContainer = () => {
                             <div className="size-10 rounded-full border">
                                 <img
                                     src={
-                                        message.senderId === authUser._id
-                                            ? authUser?.profilePic ||
+                                        message.senderId === authUser.user._id
+                                            ? authUser.user.profilePic ||
                                               "/avatar.png"
                                             : selectedUser.profilePic ||
                                               "/avatar.png"
