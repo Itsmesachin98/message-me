@@ -37,7 +37,7 @@ const ProfilePage = () => {
                             <img
                                 src={
                                     selectedImg ||
-                                    authUser.profilePic ||
+                                    authUser.user.profilePic.url ||
                                     "/avatar.png"
                                 }
                                 alt="Profile"

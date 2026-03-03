@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 
 import User from "../models/user.model.js";
 import { generateAccessToken, sendTokenCookie } from "../lib/token.js";
+import cloudinary from "../lib/cloudinary.js";
 
 // GET /api/users
 const getUsers = async (req, res) => {
@@ -206,4 +207,74 @@ const checkAuth = (req, res) => {
     }
 };
 
-export { getUsers, signup, login, logout, checkAuth };
+// PUT /api/users/update-profile
+const updateProfile = async (req, res) => {
+    try {
+        const { profilePic } = req.body;
+        const userId = req.user._id;
+
+        if (!profilePic) {
+            return res.status(400).json({
+                success: false,
+                message: "Profile picture is required",
+            });
+        }
+
+        // Get existing user
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        // Upload to Cloudinary inside folder
+        const uploadResponse = await cloudinary.uploader.upload(profilePic, {
+            folder: "chatsync/profile_pictures", // FOLDER STRUCTURE
+            resource_type: "image",
+            transformation: [
+                { width: 300, height: 300, crop: "fill", gravity: "face" },
+                { quality: "auto" },
+            ],
+        });
+
+        // Delete old profile pic (if exists & from Cloudinary)
+        if (user?.profilePic?.publicId) {
+            try {
+                await cloudinary.uploader.destroy(user.profilePic.publicId);
+            } catch (err) {
+                console.log("Old image deletion failed:", err.message);
+            }
+        }
+
+        // Update user
+        user.profilePic = {
+            url: uploadResponse.secure_url,
+            publicId: uploadResponse.public_id,
+        };
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                profilePic: user.profilePic,
+            },
+        });
+    } catch (error) {
+        console.error("UpdateProfile Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
+export { getUsers, signup, login, logout, checkAuth, updateProfile };
