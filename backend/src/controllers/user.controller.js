@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { generateAccessToken, sendTokenCookie } from "../lib/token.js";
 import cloudinary from "../lib/cloudinary.js";
+import getBase64SizeInKB from "../lib/utils.js";
 
 // GET /api/users
 const getUsers = async (req, res) => {
@@ -217,6 +218,16 @@ const updateProfile = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "Profile picture is required",
+            });
+        }
+
+        // Validate image size (max 50KB)
+        const imageSizeKB = getBase64SizeInKB(profilePic);
+
+        if (imageSizeKB > 1024) {
+            return res.status(400).json({
+                success: false,
+                message: "Image size must be less than 1024KB",
             });
         }
 
