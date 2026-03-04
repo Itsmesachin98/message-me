@@ -56,4 +56,11 @@ export const useChatStore = create((set) => ({
     setSelectedUser: (selectedUser) => set({ selectedUser }),
 
     setConversationId: (id) => set({ conversationId: id }),
+
+    resetChat: () =>
+        set({
+            selectedUser: null,
+            conversationId: null,
+            messages: [],
+        }),
 }));
