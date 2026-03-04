@@ -70,19 +70,15 @@ const signup = async (req, res) => {
 
         // Generate Token AFTER successful creation
         const token = generateAccessToken({ userId: newUser._id });
-
         sendTokenCookie(res, token);
+
+        const { password: _, ...safeUser } = newUser.toObject();
 
         // Response
         return res.status(201).json({
             success: true,
             message: "User registered successfully",
-            user: {
-                id: newUser._id,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                profilePic: newUser.profilePic,
-            },
+            user: safeUser,
         });
     } catch (error) {
         console.error("Signup Error:", error);
@@ -134,19 +130,15 @@ const login = async (req, res) => {
 
         // Generate token
         const token = generateAccessToken({ userId: user._id });
-
         sendTokenCookie(res, token);
+
+        const { password: _, ...safeUser } = user.toObject();
 
         // Send response (never send password)
         return res.status(200).json({
             success: true,
             message: "Login successful",
-            user: {
-                id: user._id,
-                fullName: user.fullName,
-                email: user.email,
-                profilePic: user.profilePic,
-            },
+            user: safeUser,
         });
     } catch (error) {
         console.error("Login Error:", error);
