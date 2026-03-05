@@ -39,10 +39,17 @@ export const useAuthStore = create((set) => ({
 
             // get().connectSocket();
         } catch (error) {
-            const errorMessage =
-                error?.response?.data?.message ||
-                error?.message ||
-                "Something went wrong";
+            let errorMessage = "Something went wrong";
+
+            if (error?.response?.status === 400) {
+                errorMessage =
+                    error?.response?.data?.errors?.[0] || errorMessage;
+            } else {
+                errorMessage =
+                    error?.response?.data?.message ||
+                    error?.message ||
+                    errorMessage;
+            }
 
             toast.error(errorMessage);
 

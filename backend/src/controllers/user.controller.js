@@ -31,21 +31,6 @@ const signup = async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
 
-        // Basic Validation
-        if (!fullName?.trim() || !email?.trim() || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
-
-        if (password.length < 6) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 6 characters",
-            });
-        }
-
         const normalizedEmail = email.toLowerCase().trim();
 
         // Check if user already exists
