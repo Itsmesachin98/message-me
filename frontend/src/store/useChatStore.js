@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 import { axiosInstance } from "../lib/axios";
 
-export const useChatStore = create((set) => ({
+export const useChatStore = create((set, get) => ({
     messages: [],
     conversationId: null,
     isMessagesLoading: false,
@@ -16,13 +16,24 @@ export const useChatStore = create((set) => ({
 
     // GET /api/users
     getUsers: async () => {
-        set({ isUsersLoading: true, users: [] });
+        const { users } = get();
+
+        // Prevent unnecessary API calls if users already exist
+        if (users && users.length > 0) return;
+
+        set({ isUsersLoading: true });
 
         try {
             const res = await axiosInstance.get("/users");
-            set({ users: res.data.users });
+            const fetchedUsers = res?.data?.users || [];
+            set({ users: fetchedUsers });
         } catch (err) {
-            toast.error(err?.response?.data?.message || "Failed to load users");
+            console.log("Error fetching users: ", err);
+
+            const errorMessage =
+                err?.response?.data?.message || "Failed to load users";
+
+            toast.error(errorMessage);
             set({ users: [] });
         } finally {
             set({ isUsersLoading: false });
@@ -40,9 +51,12 @@ export const useChatStore = create((set) => ({
                 conversationId: res.data.conversationId,
             });
         } catch (err) {
-            toast.error(
-                err?.response?.data?.message || "Failed to load messages",
-            );
+            console.log("Error fetching messages: ", err);
+
+            const errorMessage =
+                err?.response?.data?.message || "Failed to load messages";
+
+            toast.error(errorMessage);
         } finally {
             set({ isMessagesLoading: false });
         }
@@ -62,5 +76,6 @@ export const useChatStore = create((set) => ({
             selectedUser: null,
             conversationId: null,
             messages: [],
+            users: [],
         }),
 }));
