@@ -91,9 +91,9 @@ const ChatContainer = () => {
                             </time>
                         </div>
                         <div className="chat-bubble flex flex-col">
-                            {message.image && (
+                            {message.mediaUrl && (
                                 <img
-                                    src={message.image}
+                                    src={message.mediaUrl}
                                     alt="Attachment"
                                     className="sm:max-w-[200px] rounded-md mb-2"
                                 />

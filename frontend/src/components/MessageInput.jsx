@@ -34,7 +34,7 @@ const MessageInput = () => {
     const handleSendMessage = async (e) => {
         e.preventDefault();
 
-        if (!text.trim()) return;
+        if (!text.trim() && !imagePreview) return;
 
         try {
             const socket = getSocket();
@@ -43,6 +43,7 @@ const MessageInput = () => {
                 text: text.trim(),
                 conversationId,
                 receiverId: selectedUser._id,
+                image: imagePreview,
             });
 
             const { message } = res.data;
@@ -69,6 +70,7 @@ const MessageInput = () => {
         }
 
         setText(""); // Clear input field
+        setImagePreview(null);
     };
 
     return (

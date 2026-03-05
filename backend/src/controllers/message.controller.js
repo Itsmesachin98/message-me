@@ -1,5 +1,6 @@
 import Conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import cloudinary from "../lib/cloudinary.js";
 
 // GET /api/messages/:otherUserId
 const getMessages = async (req, res) => {
@@ -59,8 +60,16 @@ const getMessages = async (req, res) => {
 // POST /api/messages
 const saveMessages = async (req, res) => {
     try {
-        const { text, conversationId, receiverId } = req.body;
+        const { text, conversationId, receiverId, image } = req.body;
         const senderId = req.user._id;
+
+        // Basic validation
+        if (!receiverId) {
+            return res.status(400).json({
+                success: false,
+                message: "Receiver ID is required",
+            });
+        }
 
         let conversation;
 
@@ -86,9 +95,24 @@ const saveMessages = async (req, res) => {
             });
         }
 
-        // SECURITY CHECK
+        // Security check — sender must be part of conversation
         if (!conversation.participants.includes(senderId)) {
-            return;
+            return res.status(403).json({
+                success: false,
+                message:
+                    "You are not authorized to send messages in this conversation",
+            });
+        }
+
+        // Upload image if present
+        let imageUrl = null;
+
+        if (image) {
+            const uploadResponse = await cloudinary.uploader.upload(image, {
+                folder: "chatsync/sent_pictures", // FOLDER STRUCTURE
+            });
+
+            imageUrl = uploadResponse.secure_url;
         }
 
         // Save message
@@ -96,12 +120,13 @@ const saveMessages = async (req, res) => {
             conversationId: conversation._id,
             senderId,
             content: text,
+            mediaUrl: imageUrl,
         });
 
         res.status(201).json({ success: true, message });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ success: false, error: "Server error" });
+        console.error("Save Message Error:", error);
+        return res.status(500).json({ success: false, error: "Server error" });
     }
 };
 

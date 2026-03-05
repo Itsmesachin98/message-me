@@ -18,9 +18,6 @@ const MessageSchema = new mongoose.Schema(
         content: {
             type: String,
             trim: true,
-            required: function () {
-                return this.messageType === "text";
-            },
         },
 
         messageType: {
