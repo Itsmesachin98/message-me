@@ -7,16 +7,15 @@ export const axiosInstance = axios.create({
     withCredentials: true,
 });
 
-// 🔥 Add this interceptor
-axiosInstance.interceptors.request.use(
-    async (config) => {
-        if (window.Clerk?.session) {
-            const token = await window.Clerk.session.getToken();
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-        }
-        return config;
-    },
-    (error) => Promise.reject(error),
-);
+// axiosInstance.interceptors.request.use(
+//     async (config) => {
+//         if (window.Clerk?.session) {
+//             const token = await window.Clerk.session.getToken();
+//             if (token) {
+//                 config.headers.Authorization = `Bearer ${token}`;
+//             }
+//         }
+//         return config;
+//     },
+//     (error) => Promise.reject(error),
+// );
