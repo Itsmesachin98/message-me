@@ -5,13 +5,13 @@ import toast from "react-hot-toast";
 import { getSocket } from "../sockets/socket";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-// import { axiosInstance } from "../lib/axios";
+import { axiosInstance } from "../lib/axios";
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-    const { selectedUser, conversationId, addMessage } = useChatStore();
+    const { selectedUser, conversationId } = useChatStore();
 
     const { authUser } = useAuthStore();
 
@@ -41,29 +41,28 @@ const MessageInput = () => {
 
         const socket = getSocket();
 
-        const tempId = Date.now();
-
-        const optimisticMessage = {
-            _id: tempId,
+        const message = {
             content: text.trim(),
             image: imagePreview,
             senderId: authUser._id,
-            conversationId,
-            // status: "sending",
+            receiverId: selectedUser._id,
+            messageSentTime: new Date().toLocaleTimeString("en-IN", {
+                timeZone: "Asia/Kolkata",
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+            // conversationId,
         };
 
-        addMessage(optimisticMessage);
-
-        socket.emit("sendMessage", {
-            content: optimisticMessage.content,
-            image: optimisticMessage.image,
-            receiverId: selectedUser._id,
-            conversationId,
-            tempId,
-        });
+        socket.emit("sendMessage", message);
 
         setText("");
         setImagePreview(null);
+
+        axiosInstance.post("/messages", {
+            ...message,
+            conversationId,
+        });
     };
 
     return (

@@ -24,8 +24,8 @@ const connectSocket = () => {
     });
 
     socket.on("newMessage", (message) => {
-        // useChatStore.getState().addMessage(message);
-        useChatStore.getState().replaceMessage(message);
+        useChatStore.getState().addMessage(message);
+        // useChatStore.getState().replaceMessage(message);
     });
 
     // socket.on("messageSaved", ({ tempId, message }) => {

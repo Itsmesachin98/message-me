@@ -42,7 +42,7 @@ const getMessages = async (req, res) => {
         })
             .sort({ createdAt: 1 })
             .select(
-                "senderId content messageType mediaUrl messageTime createdAt isEdited",
+                "senderId content messageType mediaUrl messageSentTime createdAt isEdited",
             );
 
         // Respond
@@ -62,9 +62,15 @@ const getMessages = async (req, res) => {
 // POST /api/messages
 const saveMessages = async (req, res) => {
     try {
-        const { content, conversationId, receiverId, image, messageTime } =
-            req.body;
-        const senderId = req.user._id;
+        const {
+            content,
+            senderId,
+            receiverId,
+            conversationId,
+            image,
+            messageSentTime,
+        } = req.body;
+        // const senderId = req.user._id;
 
         // Basic validation
         if (!receiverId) {
@@ -122,9 +128,10 @@ const saveMessages = async (req, res) => {
         const message = await Message.create({
             conversationId: conversation._id,
             senderId,
+            receiverId,
             content,
             mediaUrl: imageUrl,
-            messageTime,
+            messageSentTime,
         });
 
         res.status(201).json({ success: true, message });

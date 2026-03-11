@@ -63,13 +63,8 @@ io.on("connection", (socket) => {
     io.emit("onlineUsers", [...onlineUsers.keys()]);
 
     // Join Conversation
-    socket.on("joinConversation", async (conversationId) => {
-        const conversation = await Conversation.findById(conversationId);
-
-        if (!conversation) return;
-        if (!conversation.participants.includes(userId)) return;
-
-        socket.join(conversationId.toString());
+    socket.on("joinConversation", async (roomId) => {
+        socket.join(roomId);
     });
 
     // Leave Conversation
@@ -79,10 +74,16 @@ io.on("connection", (socket) => {
 
     socket.on("sendMessage", async (payload) => {
         try {
-            const { content, image, receiverId, conversationId, tempId } =
-                payload;
+            const {
+                content,
+                image,
+                senderId,
+                receiverId,
+                conversationId,
+                tempId,
+            } = payload;
 
-            const senderId = userId;
+            // const senderId = userId;
 
             // Upload image if present
             let imageUrl = null;
@@ -94,6 +95,12 @@ io.on("connection", (socket) => {
 
                 imageUrl = uploadResponse.secure_url;
             }
+
+            const roomId = [userId, receiverId].sort().join("_");
+
+            io.to(roomId).emit("newMessage", payload);
+
+            return;
 
             const participants = [senderId, receiverId].sort();
             let conversation;

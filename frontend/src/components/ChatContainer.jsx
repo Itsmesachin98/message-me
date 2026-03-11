@@ -29,12 +29,14 @@ const ChatContainer = () => {
 
     useEffect(() => {
         const socket = getSocket();
-        if (!socket || !selectedUser || !conversationId) return;
+        if (!socket || !selectedUser) return;
 
-        socket.emit("joinConversation", conversationId);
+        const roomId = [authUser._id, selectedUser._id].sort().join("_");
+
+        socket.emit("joinConversation", roomId);
 
         return () => {
-            socket.emit("leaveConversation", conversationId);
+            socket.emit("leaveConversation", roomId);
         };
     }, [conversationId, selectedUser]);
 
@@ -43,6 +45,8 @@ const ChatContainer = () => {
             messageEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
+
+    console.log(messages);
 
     if (isMessagesLoading) {
         return (
@@ -86,7 +90,7 @@ const ChatContainer = () => {
                         <div className="chat-header mb-1">
                             <time className="text-xs opacity-50 ml-1">
                                 {/* {formatMessageTime(message.createdAt)} */}
-                                {message.messageTime}
+                                {message.messageSentTime}
                             </time>
                         </div>
                         <div className="chat-bubble flex flex-col">

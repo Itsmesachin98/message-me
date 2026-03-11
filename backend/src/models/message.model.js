@@ -10,7 +10,13 @@ const MessageSchema = new mongoose.Schema(
         },
 
         senderId: {
-            type: String, // clerkUserId
+            type: String,
+            required: true,
+            index: true,
+        },
+
+        receiverId: {
+            type: String,
             required: true,
             index: true,
         },
@@ -30,7 +36,7 @@ const MessageSchema = new mongoose.Schema(
             type: String,
         },
 
-        messageTime: {
+        messageSentTime: {
             type: String,
             // required: true,
         },
