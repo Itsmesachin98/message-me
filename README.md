@@ -1,91 +1,169 @@
-# MessageMe 💬
+# MessageMe
 
-MessageMe is a lightweight, real-time chat application built with a modern JavaScript stack. It features secure authentication, real-time messaging, online presence tracking, and profile image uploads — designed with a clean architecture and developer-friendly setup.
+**MessageMe** is a production-style **real-time messaging platform** built to demonstrate full-stack engineering skills including authentication, real-time communication, scalable backend architecture, and modern frontend state management.
 
----
+The project simulates a real-world messaging system with **secure authentication, real-time chat, media uploads, and presence tracking**.
 
-## ✨ Features
-
--   Secure email/password authentication using JWT (cookie-based)
--   Real-time 1-to-1 messaging with Socket.IO
--   Online / offline presence updates in real time
--   User profile picture upload via Cloudinary
--   Responsive UI built with React + Tailwind CSS
--   Clean separation of frontend and backend
--   Optimized for local development and production deployment
+**Live Demo**
+https://chatsync-hub.vercel.app
 
 ---
 
-## 🛠 Tech stack
+# Key Highlights
 
-### Backend
+- Secure **JWT authentication using HTTP-only cookies**
+- **Real-time messaging** powered by Socket.IO
+- **Optimistic UI updates** for instant message delivery
+- **Online/offline presence detection**
+- **Image messaging and profile uploads via Cloudinary**
+- Clean and scalable **modular backend architecture**
+- Efficient client state management using **Zustand**
 
--   Node.js
--   Express.js
--   MongoDB + Mongoose
--   Socket.IO
--   JWT Authentication
--   Cloudinary (image uploads)
-
-### Frontend
-
--   React (Vite)
--   Tailwind CSS
--   Zustand (state management)
--   Axios
--   socket.io-client
+This project demonstrates **production-style engineering patterns** often discussed in technical interviews.
 
 ---
 
-## 🚀 Getting Started
+# Technical Skills Demonstrated
 
-### Prerequisites
+### Backend Engineering
 
-Ensure you have the following installed:
+- REST API design
+- Secure authentication with JWT cookies
+- WebSocket architecture using Socket.IO
+- MongoDB schema design with Mongoose
+- Middleware-based validation and protection
+- Cloud asset management
 
--   Node.js (v18+ recommended)
--   npm or yarn
--   MongoDB (local or cloud)
--   Cloudinary account (for profile images)
+### Frontend Engineering
+
+- React single-page application architecture
+- Global state management with Zustand
+- Real-time UI synchronization
+- Optimistic UI updates
+- Responsive UI with Tailwind CSS
+
+### System Design Concepts
+
+- Event-driven real-time systems
+- Room-based messaging architecture
+- Separation of REST APIs and WebSocket events
+- Modular project structure for scalability
 
 ---
 
-## 🔧 Backend Setup
+# Tech Stack
 
-1. Navigate to the backend directory and install dependencies:
+**Backend**
+
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- Socket.IO
+- JWT Authentication
+- Joi Validation
+- Cloudinary
+
+**Frontend**
+
+- React
+- Vite
+- Tailwind CSS
+- DaisyUI
+- Zustand
+- socket.io-client
+- React Router
+
+**Developer Tools**
+
+- Nodemon
+- ESLint
+- React Hot Toast
+- Lucide Icons
+
+---
+
+# Core Features
+
+### Authentication
+
+- Secure signup and login
+- JWT stored in **HTTP-only cookies**
+- Protected API routes via authentication middleware
+- Session validation endpoint
+
+### Real-Time Messaging
+
+- 1-to-1 chat using **Socket.IO**
+- Conversation-based rooms
+- Instant message broadcasting
+- Optimistic UI updates
+
+### Online Presence
+
+- Detects connected users in real time
+- Broadcasts active users to clients
+
+### Media Handling
+
+- Profile image uploads
+- Image messages inside chat
+- Cloudinary image transformations and cleanup
+- File size validation
+
+### Chat Persistence
+
+- MongoDB conversation storage
+- Message history retrieval
+- Conversation lookup between users
+
+---
+
+# Clone and Run Locally
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Itsmesachin98/message-me.git
+cd message-me
+```
+
+---
+
+### 2. Setup Backend
 
 ```bash
 cd backend
 npm install
 ```
 
-2. Create a `.env` file inside `backend/`:
+Create `.env` inside **backend/**
 
 ```env
 PORT=5001
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+MONGODB_URI=<your-mongodb-uri>
+JWT_SECRET=<your-secret>
+JWT_COOKIE_NAME=accessToken
+JWT_EXPIRES_IN=7d
+FRONTEND_URL=http://localhost:5173
+
+CLOUDINARY_CLOUD_NAME=<cloud-name>
+CLOUDINARY_API_KEY=<api-key>
+CLOUDINARY_API_SECRET=<api-secret>
+
 NODE_ENV=development
 ```
 
-3. Start the backend server:
+Start backend server:
 
 ```bash
 npm run dev
 ```
 
-📍 Backend runs by default at:  
-`http://localhost:5001`  
-API base path: `/api`
-
 ---
 
-## 🎨 Frontend Setup
+### 3. Setup Frontend
 
-1. Open a new terminal and navigate to the frontend directory:
+Open another terminal.
 
 ```bash
 cd frontend
@@ -93,81 +171,63 @@ npm install
 npm run dev
 ```
 
-2. The frontend will be available at:
+Frontend will run on:
 
 ```
 http://localhost:5173
 ```
 
-CORS is preconfigured on the backend to allow this origin during development.
-
 ---
 
-## 🧪 Usage
+### 4. Environment Configuration
 
-1. Open `http://localhost:5173` in your browser
-2. Sign up or log in
-3. Upload a profile picture
-4. Start real-time conversations
-5. See online users update instantly
+Create `.env` inside **frontend/**
 
----
-
-## 🔐 Environment Variables Reference
-
-### Backend (`backend/.env`)
-
-| Variable                | Description                   |
-| ----------------------- | ----------------------------- |
-| `PORT`                  | Backend server port           |
-| `MONGODB_URI`           | MongoDB connection string     |
-| `JWT_SECRET`            | JWT signing secret            |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name         |
-| `CLOUDINARY_API_KEY`    | Cloudinary API key            |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret         |
-| `NODE_ENV`              | `development` or `production` |
-
-### Frontend
-
-The frontend Axios instance uses:
-
-```js
-baseURL: http://localhost:5001/api
+```env
+VITE_API_BASE_URL=http://localhost:5001
 ```
 
-Update this value when deploying the backend.
+Axios configuration uses:
+
+```js
+withCredentials: true;
+```
+
+to support **cookie-based authentication**.
 
 ---
 
-## 📁 Project Structure (high level)
+# Testing the Application
 
--   `backend/` — Express API
-
-    -   `src/index.js` — server entry
-    -   `src/routes/` — API routes (`auth.route.js`, `message.route.js`)
-    -   `src/controllers/` — request handlers
-    -   `src/models/` — Mongoose models
-    -   `src/lib/` — helpers (db, cloudinary, socket, utils)
-
--   `frontend/` — React app (Vite)
-    -   `src/main.jsx`, `src/App.jsx` — app entry
-    -   `src/components/` — UI components
-    -   `src/pages/` — pages (Home, Login, Signup, Profile)
-    -   `src/lib/axios.js` — axios instance
-    -   `src/store/` — zustand stores
+1. Open the application
+2. Register two different users
+3. Login in two browser sessions
+4. Start a conversation
+5. Send text or image messages
+6. Observe real-time updates
+7. Inspect stored messages in MongoDB
 
 ---
 
-## 📌 Future Improvements
+# Future Improvements
 
--   Message read receipts
--   Typing indicators
--   Group chats
--   End-to-end encryption
--   Push notifications
+- Group chats and channels
+- Typing indicators
+- Message read receipts
+- Chat pagination
+- End-to-end encryption
+- Automated E2E tests (Playwright / Cypress)
 
 ---
 
-## 📄 License
+# Author
 
-This project is licensed under the MIT License.
+Sachin Kumar
+
+Full-stack developer focused on **backend systems, real-time applications, and scalable architecture**.
+
+---
+
+# License
+
+MIT
