@@ -70,14 +70,6 @@ export const useChatStore = create((set, get) => ({
     addMessage: (message) =>
         set((state) => ({ messages: [...state.messages, message] })),
 
-    replaceMessage: (message) => {
-        set((state) => ({
-            messages: state.messages.map((msg) =>
-                msg._id === message.tempId ? message : msg,
-            ),
-        }));
-    },
-
     setSelectedUser: (selectedUser) => set({ selectedUser }),
 
     setConversationId: (id) => set({ conversationId: id }),

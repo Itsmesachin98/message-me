@@ -7,8 +7,6 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
 
-import Conversation from "../models/conversation.model.js";
-import Message from "../models/message.model.js";
 import cloudinary from "./cloudinary.js";
 
 const app = express();
@@ -83,8 +81,6 @@ io.on("connection", (socket) => {
                 tempId,
             } = payload;
 
-            // const senderId = userId;
-
             // Upload image if present
             let imageUrl = null;
 
@@ -99,42 +95,6 @@ io.on("connection", (socket) => {
             const roomId = [userId, receiverId].sort().join("_");
 
             io.to(roomId).emit("newMessage", payload);
-
-            return;
-
-            const participants = [senderId, receiverId].sort();
-            let conversation;
-
-            // CASE 1: If conversationId exists
-            if (conversationId) {
-                conversation = await Conversation.findById(conversationId);
-            }
-
-            // CASE 2: Find by participants
-            if (!conversation) {
-                conversation = await Conversation.findOne({ participants });
-            }
-
-            // CASE 3: Create conversation
-            if (!conversation) {
-                conversation = await Conversation.create({
-                    participants,
-                    createdBy: senderId,
-                });
-            }
-
-            // Save message
-            const message = await Message.create({
-                conversationId: conversation._id,
-                senderId,
-                content,
-                mediaUrl: imageUrl,
-            });
-
-            io.to(conversation._id.toString()).emit("newMessage", {
-                ...message,
-                tempId,
-            });
         } catch (err) {
             console.error("sendMessage error:", err);
         }
