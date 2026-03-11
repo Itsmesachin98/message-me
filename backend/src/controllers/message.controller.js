@@ -67,7 +67,7 @@ const saveMessages = async (req, res) => {
             senderId,
             receiverId,
             conversationId,
-            image,
+            mediaUrl,
             messageSentTime,
         } = req.body;
         // const senderId = req.user._id;
@@ -116,8 +116,8 @@ const saveMessages = async (req, res) => {
         // Upload image if present
         let imageUrl = null;
 
-        if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image, {
+        if (mediaUrl) {
+            const uploadResponse = await cloudinary.uploader.upload(mediaUrl, {
                 folder: "chatsync/sent_pictures", // FOLDER STRUCTURE
             });
 

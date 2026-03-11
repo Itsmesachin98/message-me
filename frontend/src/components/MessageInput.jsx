@@ -43,7 +43,7 @@ const MessageInput = () => {
 
         const message = {
             content: text.trim(),
-            image: imagePreview,
+            mediaUrl: imagePreview,
             senderId: authUser._id,
             receiverId: selectedUser._id,
             messageSentTime: new Date().toLocaleTimeString("en-IN", {
@@ -51,7 +51,6 @@ const MessageInput = () => {
                 hour: "2-digit",
                 minute: "2-digit",
             }),
-            // conversationId,
         };
 
         socket.emit("sendMessage", message);
