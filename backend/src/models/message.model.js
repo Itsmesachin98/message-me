@@ -38,7 +38,6 @@ const MessageSchema = new mongoose.Schema(
 
         messageSentTime: {
             type: String,
-            // required: true,
         },
 
         isEdited: {

@@ -4,7 +4,6 @@ dotenv.config();
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { clerkMiddleware } from "@clerk/express";
 
 import messageRoutes from "./routes/message.route.js";
 import userRoutes from "./routes/user.route.js";
@@ -15,13 +14,6 @@ connectDB();
 
 const PORT = process.env.PORT || 5001;
 const FRONTEND_URL = process.env.FRONTEND_URL;
-
-// Clerk middleware
-app.use(
-    clerkMiddleware({
-        secretKey: process.env.CLERK_SECRET_KEY,
-    }),
-);
 
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
