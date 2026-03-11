@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken";
 import cookie from "cookie";
 
 import Conversation from "../models/conversation.model.js";
+import Message from "../models/message.model.js";
+import cloudinary from "./cloudinary.js";
 
 const app = express();
 const server = createServer(app);
@@ -61,17 +63,13 @@ io.on("connection", (socket) => {
     io.emit("onlineUsers", [...onlineUsers.keys()]);
 
     // Join Conversation
-    socket.on("joinConversation", async (conversationId, callback) => {
+    socket.on("joinConversation", async (conversationId) => {
         const conversation = await Conversation.findById(conversationId);
 
         if (!conversation) return;
         if (!conversation.participants.includes(userId)) return;
 
         socket.join(conversationId.toString());
-
-        if (typeof callback === "function") {
-            callback({ success: true });
-        }
     });
 
     // Leave Conversation
@@ -79,9 +77,60 @@ io.on("connection", (socket) => {
         socket.leave(conversationId.toString());
     });
 
-    socket.on("sendMessage", (message) => {
-        const { conversationId } = message;
-        io.to(conversationId).emit("newMessage", message);
+    socket.on("sendMessage", async (payload) => {
+        try {
+            const { content, image, receiverId, conversationId, tempId } =
+                payload;
+
+            const senderId = userId;
+
+            // Upload image if present
+            let imageUrl = null;
+
+            if (image) {
+                const uploadResponse = await cloudinary.uploader.upload(image, {
+                    folder: "chatsync/sent_pictures", // FOLDER STRUCTURE
+                });
+
+                imageUrl = uploadResponse.secure_url;
+            }
+
+            const participants = [senderId, receiverId].sort();
+            let conversation;
+
+            // CASE 1: If conversationId exists
+            if (conversationId) {
+                conversation = await Conversation.findById(conversationId);
+            }
+
+            // CASE 2: Find by participants
+            if (!conversation) {
+                conversation = await Conversation.findOne({ participants });
+            }
+
+            // CASE 3: Create conversation
+            if (!conversation) {
+                conversation = await Conversation.create({
+                    participants,
+                    createdBy: senderId,
+                });
+            }
+
+            // Save message
+            const message = await Message.create({
+                conversationId: conversation._id,
+                senderId,
+                content,
+                mediaUrl: imageUrl,
+            });
+
+            io.to(conversation._id.toString()).emit("newMessage", {
+                ...message,
+                tempId,
+            });
+        } catch (err) {
+            console.error("sendMessage error:", err);
+        }
     });
 
     // Handle Disconnection

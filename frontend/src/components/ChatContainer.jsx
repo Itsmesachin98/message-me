@@ -4,7 +4,7 @@ import { useChatStore } from "../store/useChatStore";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
-import { formatMessageTime } from "../lib/utils";
+// import { formatMessageTime } from "../lib/utils";
 import { getSocket } from "../sockets/socket";
 import { useAuthStore } from "../store/useAuthStore";
 
@@ -25,20 +25,18 @@ const ChatContainer = () => {
         if (!selectedUser) return;
 
         getMessages(selectedUser._id);
-    }, [selectedUser, getMessages]);
+    }, [selectedUser]);
 
     useEffect(() => {
-        if (!conversationId) return;
-
         const socket = getSocket();
-        if (!socket) return;
+        if (!socket || !selectedUser || !conversationId) return;
 
         socket.emit("joinConversation", conversationId);
 
         return () => {
             socket.emit("leaveConversation", conversationId);
         };
-    }, [conversationId]);
+    }, [conversationId, selectedUser]);
 
     useEffect(() => {
         if (messageEndRef.current && messages) {
@@ -87,7 +85,8 @@ const ChatContainer = () => {
                         </div>
                         <div className="chat-header mb-1">
                             <time className="text-xs opacity-50 ml-1">
-                                {formatMessageTime(message.createdAt)}
+                                {/* {formatMessageTime(message.createdAt)} */}
+                                {message.messageTime}
                             </time>
                         </div>
                         <div className="chat-bubble flex flex-col">

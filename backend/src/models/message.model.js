@@ -30,6 +30,11 @@ const MessageSchema = new mongoose.Schema(
             type: String,
         },
 
+        messageTime: {
+            type: String,
+            // required: true,
+        },
+
         isEdited: {
             type: Boolean,
             default: false,

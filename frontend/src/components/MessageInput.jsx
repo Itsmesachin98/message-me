@@ -3,14 +3,17 @@ import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { getSocket } from "../sockets/socket";
+import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
-import { axiosInstance } from "../lib/axios";
+// import { axiosInstance } from "../lib/axios";
 
 const MessageInput = () => {
     const [text, setText] = useState("");
     const [imagePreview, setImagePreview] = useState(null);
     const fileInputRef = useRef(null);
-    const { selectedUser, conversationId, setConversationId } = useChatStore();
+    const { selectedUser, conversationId, addMessage } = useChatStore();
+
+    const { authUser } = useAuthStore();
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -36,40 +39,30 @@ const MessageInput = () => {
 
         if (!text.trim() && !imagePreview) return;
 
-        try {
-            const socket = getSocket();
+        const socket = getSocket();
 
-            const res = await axiosInstance.post("/messages", {
-                text: text.trim(),
-                conversationId,
-                receiverId: selectedUser._id,
-                image: imagePreview,
-            });
+        const tempId = Date.now();
 
-            const { message } = res.data;
+        const optimisticMessage = {
+            _id: tempId,
+            content: text.trim(),
+            image: imagePreview,
+            senderId: authUser._id,
+            conversationId,
+            // status: "sending",
+        };
 
-            if (!conversationId) {
-                const newConversationId = message.conversationId;
+        addMessage(optimisticMessage);
 
-                setConversationId(newConversationId);
+        socket.emit("sendMessage", {
+            content: optimisticMessage.content,
+            image: optimisticMessage.image,
+            receiverId: selectedUser._id,
+            conversationId,
+            tempId,
+        });
 
-                socket.emit(
-                    "joinConversation",
-                    newConversationId,
-                    (response) => {
-                        if (response.success) {
-                            socket.emit("sendMessage", message);
-                        }
-                    },
-                );
-            } else {
-                socket.emit("sendMessage", message);
-            }
-        } catch (error) {
-            console.log("Failed to send message: ", error);
-        }
-
-        setText(""); // Clear input field
+        setText("");
         setImagePreview(null);
     };
 

@@ -46,6 +46,9 @@ export const useChatStore = create((set, get) => ({
 
         try {
             const res = await axiosInstance.get(`/messages/${otherUserId}`);
+
+            console.log("This is res.data: ", res.data);
+
             set({
                 messages: res.data.messages,
                 conversationId: res.data.conversationId,
@@ -66,6 +69,14 @@ export const useChatStore = create((set, get) => ({
 
     addMessage: (message) =>
         set((state) => ({ messages: [...state.messages, message] })),
+
+    replaceMessage: (message) => {
+        set((state) => ({
+            messages: state.messages.map((msg) =>
+                msg._id === message.tempId ? message : msg,
+            ),
+        }));
+    },
 
     setSelectedUser: (selectedUser) => set({ selectedUser }),
 
