@@ -1,6 +1,6 @@
-# MessageMe
+# ChatSync
 
-**MessageMe** is a production-style **real-time messaging platform** built to demonstrate full-stack engineering skills including authentication, real-time communication, scalable backend architecture, and modern frontend state management.
+**ChatSync** is a production-style **real-time messaging platform** built to demonstrate full-stack engineering skills including authentication, real-time communication, scalable backend architecture, and modern frontend state management.
 
 The project simulates a real-world messaging system with **secure authentication, real-time chat, media uploads, and presence tracking**.
 
