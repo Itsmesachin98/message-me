@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+    pingAllUsers,
     checkAuth,
     getUsers,
     signup,
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.get("/", protectRoute, getUsers);
 router.get("/check", protectRoute, checkAuth);
+router.get("/ping-users", pingAllUsers);
 
 router.post("/signup", validateRequest(registerSchema), signup);
 router.post("/login", login);

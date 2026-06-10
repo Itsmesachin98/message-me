@@ -5,6 +5,23 @@ import { generateAccessToken, sendTokenCookie } from "../lib/token.js";
 import cloudinary from "../lib/cloudinary.js";
 import getBase64SizeInKB from "../lib/utils.js";
 
+const pingAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({});
+
+        const userNames = users.map((user) => user.fullName);
+
+        return res.status(200).json({ success: true, users: userNames });
+    } catch (error) {
+        console.error("pingAllUsers Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error",
+        });
+    }
+};
+
 // GET /api/users
 const getUsers = async (req, res) => {
     try {
@@ -265,4 +282,12 @@ const updateProfile = async (req, res) => {
     }
 };
 
-export { getUsers, signup, login, logout, checkAuth, updateProfile };
+export {
+    pingAllUsers,
+    getUsers,
+    signup,
+    login,
+    logout,
+    checkAuth,
+    updateProfile,
+};
